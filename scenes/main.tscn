@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwjq8x7vx3k1v"]
+
+[ext_resource type="PackedScene" uid="uid://cx8v2laqj5m3n" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://bxy8k2v3n4m5p" path="res://scenes/bullets/bullet.tscn" id="2_0wfyh"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+bullet_scene = ExtResource("2_0wfyh")

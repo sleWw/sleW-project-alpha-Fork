@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxy8k2v3n4m5p"]
+
+[ext_resource type="Script" path="res://scripts/bullets/bullet.gd" id="1_bullet"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(4, 4)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2"]
+size = Vector2(6, 6)
+
+[node name="Bullet" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_bullet")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+modulate = Color(1, 1, 0, 1)
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+color = Color(1, 1, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
