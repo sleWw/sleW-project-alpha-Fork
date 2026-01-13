@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bwjq8x7vx3k1v"]
+[gd_scene load_steps=14 format=3 uid="uid://bwjq8x7vx3k1v"]
 
 [ext_resource type="PackedScene" uid="uid://cx8v2laqj5m3n" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bxy8k2v3n4m5p" path="res://scenes/bullets/bullet.tscn" id="2_0wfyh"]
@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://bymqtonq1j6l3" path="res://assets/ui/Sci-Fi Blue/PNG/01_Element_gage/status_opponent_user_frame.png" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://iqibts3kvpuo" path="res://scripts/ui/ammo_counter.gd" id="8_tipki"]
 [ext_resource type="Texture2D" uid="uid://dw0jycvar2dgh" path="res://assets/ui/ammo-counter.png" id="9_85g3d"]
+[ext_resource type="Texture2D" uid="uid://bpof5ytqaputf" path="res://assets/ui/Frame.png" id="10_ya4ey"]
+[ext_resource type="Texture2D" uid="uid://micb5p0i5yt" path="res://assets/ui/ellipse_under.png" id="11_eb6dy"]
 
 [sub_resource type="Gradient" id="Gradient_0wfyh"]
 
@@ -66,3 +68,17 @@ theme_override_font_sizes/font_size = 32
 text = "20"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ReloadProgress" type="TextureProgressBar" parent="AmmoCounter"]
+visible = false
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 1802.0
+offset_top = -93.0
+offset_right = 1924.0
+offset_bottom = 29.0
+grow_vertical = 0
+fill_mode = 2
+texture_under = ExtResource("10_ya4ey")
+texture_progress = ExtResource("11_eb6dy")

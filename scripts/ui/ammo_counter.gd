@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 @onready var ammo_label = $AmmoLabel
+@onready var reload_progress = $ReloadProgress
 
 var player: Node = null
 var last_known_ammo: int = 20
@@ -21,6 +22,15 @@ func _ready():
 		if "current_ammo" in player:
 			last_known_ammo = player.current_ammo
 			update_display()
+	
+	# Initialize reload progress
+	if reload_progress:
+		reload_progress.min_value = 0.0
+		reload_progress.max_value = 100.0  # Changed from 1.0 to match calculation
+		reload_progress.value = 0.0
+		reload_progress.visible = false
+		reload_progress.fill_mode = 2  # FILL_CLOCKWISE for circular
+		reload_progress.radial_initial_angle = 0.0
 
 func _process(_delta):
 	if player and "current_ammo" in player:
@@ -30,17 +40,30 @@ func _process(_delta):
 			last_known_ammo = player.current_ammo
 			if "is_reloading" in player:
 				last_known_reloading = player.is_reloading
+		
+		# Update reload progress if reloading
+		if "is_reloading" in player and player.is_reloading and reload_progress:
+			if "reload_time" in player and "reload_timer" in player:
+				var reload_progress_percent = (1.0 - (player.reload_timer / player.reload_time)) * 100.0
+				reload_progress.value = reload_progress_percent
 
 func update_display():
 	if not ammo_label:
 		return
 	
 	if player and "current_ammo" in player:
-		# Check if reloading - show "Reloading" text instead of numbers
+		# Check if reloading - show circular progress, hide ammo text
 		if "is_reloading" in player and player.is_reloading:
-			ammo_label.text = "Reloading"
+			ammo_label.visible = false
+			if reload_progress:
+				reload_progress.visible = true
 		else:
 			# Show ammo count as "current/max"
+			ammo_label.visible = true
+			if reload_progress:
+				reload_progress.visible = false
+				reload_progress.value = 0.0
+			
 			var current = str(player.current_ammo)
 			var max_ammo = str(player.magazine_size) if "magazine_size" in player else "20"
 			ammo_label.text = current + "/" + max_ammo
