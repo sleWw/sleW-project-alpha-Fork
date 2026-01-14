@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxy8k2v3n4m5p"]
+[gd_scene load_steps=4 format=3 uid="uid://bxy8k2v3n4m5p"]
 
-[ext_resource type="Script" path="res://scripts/bullets/bullet.gd" id="1_bullet"]
-[ext_resource type="Texture2D" path="res://assets/bullets/laser-bullets-1/01.png" id="2_bullet_sprite"]
+[ext_resource type="Script" uid="uid://dtd1w67t1ayka" path="res://scripts/bullets/bullet.gd" id="1_bullet"]
+[ext_resource type="Texture2D" uid="uid://8xiqgfbbcgs8" path="res://assets/bullets/laser-bullets-1/01.png" id="2_bullet_sprite"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(8, 8)

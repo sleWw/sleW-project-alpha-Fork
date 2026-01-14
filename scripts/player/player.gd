@@ -30,11 +30,12 @@ var is_shooting: bool = false
 
 # Dash variables
 @export var dash_speed: float = 500.0
-@export var dash_duration: float = 0.15  # How long the dash lasts
+@export var dash_duration: float = 0.3  # How long the dash lasts
 @export var dash_cooldown: float = 0.5  # Cooldown between dashes
 var is_dashing: bool = false
 var dash_timer: float = 0.0
 var dash_cooldown_timer: float = 0.0
+var dash_direction: Vector2 = Vector2.ZERO # Store direction of dash start
 
 #Health variables
 var current_health: float = 100.0
@@ -86,8 +87,8 @@ func _physics_process(delta):
 	# Handle movement - dash takes priority over normal movement
 	if is_dashing:
 		# During dash, move in mouse direction at dash speed
-		velocity = mouse_direction * dash_speed
-		last_direction = mouse_direction  # Update facing direction
+		velocity = dash_direction * dash_speed
+		last_direction = dash_direction  # Update facing direction
 	else:
 		# W = North (move up, negative Y)
 		if Input.is_key_pressed(KEY_W):
@@ -174,6 +175,8 @@ func start_dash():
 	if is_dashing:
 		return
 	
+	dash_direction = mouse_direction.normalized()
+
 	# Start dash
 	is_dashing = true
 	dash_timer = dash_duration
@@ -281,7 +284,9 @@ func update_animations(direction: Vector2):
 	
 	# If shooting (mouse button held), use shoot animation based on mouse direction
 	# Character faces mouse direction regardless of movement direction
-	if is_shooting_button:
+	if is_dashing:
+		anim_name = "dash"
+	elif is_shooting_button:
 		anim_name = get_direction_animation(mouse_direction, "shoot")
 		last_direction = mouse_direction  # Update facing direction to mouse
 	elif is_moving:
@@ -291,7 +296,12 @@ func update_animations(direction: Vector2):
 		anim_name = get_direction_animation(last_direction, "idle")
 	
 	if anim_name != "" and animated_sprite.sprite_frames.has_animation(anim_name):
-		animated_sprite.play(anim_name)
+		if animated_sprite.animation != anim_name:
+			animated_sprite.play(anim_name)
+	else:
+		# Debug: print if animation doesn't exist
+		if anim_name == "dash":
+			print("Warning: 'dash' animation not found in sprite_frames!")
 
 func get_direction_animation(dir: Vector2, anim_type: String) -> String:
 	var prefix = anim_type  # "walk", "idle", or "shoot"

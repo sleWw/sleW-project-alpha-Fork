@@ -31,7 +31,6 @@ func _ready():
 		reload_progress.visible = false
 		reload_progress.fill_mode = 2  # FILL_CLOCKWISE for circular
 		reload_progress.radial_initial_angle = 0.0
-
 func _process(_delta):
 	if player and "current_ammo" in player:
 		# Update if ammo changed or reloading state changed
