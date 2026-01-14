@@ -1,13 +1,12 @@
-[gd_scene load_steps=39 format=3 uid="uid://cx8v2laqj5m3n"]
+[gd_scene load_steps=38 format=3 uid="uid://cx8v2laqj5m3n"]
 
 [ext_resource type="Script" uid="uid://dm4mjrjkevtu7" path="res://scripts/player/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://cp2ra0s25mtck" path="res://assets/player/DARK - Glitch Samurai/Glitch Samurai-Idle.png" id="2_cnsyf"]
 [ext_resource type="Shape2D" path="res://scenes/player/player_collision.tres" id="2_collision"]
 [ext_resource type="Texture2D" uid="uid://taxvrk8r0xd8" path="res://assets/player/DARK - Glitch Samurai/Glitch Samurai-Glitch Out.png" id="2_qek5x"]
 [ext_resource type="Texture2D" uid="uid://5k42w2s5by6h" path="res://assets/player/DARK - Glitch Samurai/Glitch Samurai-Land.png" id="3_5gtgg"]
+[ext_resource type="PackedScene" uid="uid://dkcn6x88shwgd" path="res://scenes/gun.tscn" id="9_5gtgg"]
 [ext_resource type="Texture2D" uid="uid://vdfpou1phjwd" path="res://assets/player/DARK - Glitch Samurai/Glitch Samurai-Run.png" id="11_ugbui"]
-[ext_resource type="AudioStream" uid="uid://bwxgndi33evfk" path="res://assets/audio/sounds/gun/gun-reload1.mp3" id="X_reload_sound"]
-[ext_resource type="AudioStream" uid="uid://6se4cbcxve74" path="res://assets/audio/sounds/fx-pack-1/WAV/FX_Shoot04.wav" id="X_shoot_sound"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h17s1"]
 atlas = ExtResource("2_qek5x")
@@ -924,11 +923,11 @@ animations = [{
 }]
 
 [node name="Player" type="CharacterBody2D"]
+up_direction = Vector2(0, 1)
 script = ExtResource("1_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
-position = Vector2(10, -3)
 sprite_frames = SubResource("SpriteFrames_lvxji")
 animation = &"dash"
 autoplay = "idle down"
@@ -936,15 +935,10 @@ frame = 7
 frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(2, 0)
+position = Vector2(-1, 8)
 shape = ExtResource("2_collision")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("X_shoot_sound")
-volume_db = -11.449
-
-[node name="ReloadSoundPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("X_reload_sound")
-volume_db = -18.128
+[node name="Gun" parent="." instance=ExtResource("9_5gtgg")]
+position = Vector2(0, 0)

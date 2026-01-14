@@ -39,8 +39,9 @@ var default_fire_rate: float = 0.2
 var keybinds_manager: Node = null
 var waiting_for_keybind: String = "" # Action name we are waiting to rebind
 
-# Player reference
+# Player and gun references
 var player: Node = null
+var gun: Node = null
 
 func _ready():
 	# Set process mode to always so we can receive input even when paused
@@ -52,6 +53,10 @@ func _ready():
 		var main = get_tree().current_scene
 		if main:
 			player = main.get_node_or_null("Player")
+	
+	# Find gun node (through player)
+	if player:
+		gun = player.get_node_or_null("Gun")
 	
 	# Get keybinds manager
 	keybinds_manager = get_node("/root/KeybindManager") if has_node("/root/KeybindManager") else null
@@ -107,16 +112,16 @@ func _ready():
 
 	if fire_rate_slider:
 		fire_rate_slider.value_changed.connect(_on_fire_rate_changed)
-		if player:
-			fire_rate_slider.value = player.fire_rate if "fire_rate" in player else default_fire_rate
+		if gun:
+			fire_rate_slider.value = gun.fire_rate if "fire_rate" in gun else default_fire_rate
 		else:
 			fire_rate_slider.value = default_fire_rate
 		_update_fire_rate_label()
 	
 	if infinite_ammo_checkbox:
 		infinite_ammo_checkbox.toggled.connect(_on_infinite_ammo_toggled)
-		if player and "infinite_ammo" in player:
-			infinite_ammo_checkbox.button_pressed = player.infinite_ammo
+		if gun and "infinite_ammo" in gun:
+			infinite_ammo_checkbox.button_pressed = gun.infinite_ammo
 	
 	if infinite_hp_checkbox:
 		infinite_hp_checkbox.toggled.connect(_on_infinite_hp_toggled)
@@ -186,7 +191,7 @@ func _input(event):
 			return
 
 func _unhandled_input(event):
-	# Only handle ESC key
+	# Only handle ESC key 
 	if event is InputEventKey:
 		if event.keycode == KEY_ESCAPE and event.pressed:
 			if current_menu == MenuState.MAIN:
@@ -197,7 +202,7 @@ func _unhandled_input(event):
 
 func toggle_pause():
 	is_paused = !is_paused
-	
+
 	if is_paused:
 		# Pause the game
 		get_tree().paused = true
@@ -260,16 +265,16 @@ func _on_bullet_velocity_changed(value: float):
 	_update_bullet_velocity_label()
 
 func _on_fire_rate_changed(value: float):
-	if player and "fire_rate" in player:
-		player.fire_rate = value
+	if gun and "fire_rate" in gun:
+		gun.fire_rate = value
 	_update_fire_rate_label()
 
 func _on_infinite_ammo_toggled(pressed: bool):
-	if player:
-		if "infinite_ammo" not in player:
-			player.set("infinite_ammo", pressed)
+	if gun:
+		if "infinite_ammo" not in gun:
+			gun.set("infinite_ammo", pressed)
 		else:
-			player.infinite_ammo = pressed
+			gun.infinite_ammo = pressed
 
 func _on_infinite_hp_toggled(pressed: bool):
 	if player:

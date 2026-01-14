@@ -10,8 +10,7 @@ extends CharacterBody2D
 
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var camera = $Camera2D
-@onready var shoot_sound = $AudioStreamPlayer
-@onready var reload_sound = $ReloadSoundPlayer
+@onready var gun = get_node_or_null("Gun")  # Gun scene node (flexible lookup)
 
 #
 # Keybinds Manager
@@ -21,11 +20,7 @@ var keybinds_manager: Node = null
 var last_direction: Vector2 = Vector2.DOWN
 var mouse_direction: Vector2 = Vector2.DOWN
 
-# Shooting variables
-@export var bullet_scene: PackedScene
-@export var bullet_speed: float = 500.0
-@export var fire_rate: float = 0.2  # Time between shots
-var time_since_last_shot: float = 0.0
+# Shooting variables (tracking flag only - actual shooting handled by gun)
 var is_shooting: bool = false
 
 # Dash variables
@@ -41,33 +36,21 @@ var dash_direction: Vector2 = Vector2.ZERO # Store direction of dash start
 var current_health: float = 100.0
 var max_health: float = 100.0
 
-# Ammo Variables
-@export var magazine_size: int = 20
-var current_ammo: int = 20
-var is_reloading: bool = false
-@export var reload_time: float = 1.5
-var reload_timer: float = 0.0
-
 # Dev tools flags
-var infinite_ammo: bool = false
 var infinite_hp: bool = false
 
 func _ready():
 	keybinds_manager = get_node("/root/KeybindManager") if has_node("/root/KeybindManager") else null
 	if not keybinds_manager:
 		keybinds_manager = get_node("/root/KeybindManager") if get_tree().root.has_node("/root/KeybindManager") else null
+	
+	# Initialize gun if it exists
+	if not gun:
+		push_warning("Player: Gun node not found! Make sure to add the Gun scene as a child of Player.")
 
 func _physics_process(delta):
 	# Update timers
-	time_since_last_shot += delta
 	dash_cooldown_timer -= delta
-
-	# Update reload timer
-	if is_reloading:
-		reload_timer -= delta
-		if reload_timer <= 0.0:
-			reload_timer = 0.0
-			finish_reload()
 	
 	# Update dash timer
 	if is_dashing:
@@ -113,12 +96,9 @@ func _physics_process(delta):
 		else:
 			velocity = velocity.move_toward(Vector2.ZERO, speed)
 	
-	# Handle shooting
-	handle_shooting()
-	
 	# Update animations - use dash direction if dashing, otherwise use input direction
-	var anim_direction = mouse_direction if is_dashing else input_direction
-	update_animations(anim_direction)
+	# var anim_direction = mouse_direction if is_dashing else input_direction
+	update_animations(input_direction)
 	
 	# Move the character (use move_and_collide for top-down, or move_and_slide)
 	# For top-down without collisions, we can use move_and_slide which should work fine
@@ -134,9 +114,6 @@ func _input(event):
 	if event is InputEventKey:
 		if event.keycode == dash_keycode and event.pressed:
 			start_dash()
-		elif event.keycode == KEY_R and event.pressed:
-			if not infinite_ammo and current_ammo < magazine_size and not is_reloading:
-				start_reload()
 	
 	# Check if it's a mouse button
 	if event is InputEventMouseButton and event.pressed:
@@ -146,11 +123,6 @@ func _input(event):
 			if event.button_index == mouse_button_index:
 				start_dash()
 	
-	# Handle reload input (R) - skip if infinite ammo
-	if event is InputEventKey and not infinite_ammo:
-		if event.keycode == KEY_R and event.pressed:
-			if current_ammo < magazine_size and not is_reloading:
-				start_reload()
 	# Handle mouse wheel zoom
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -190,89 +162,7 @@ func take_damage(amount: float):
 	current_health -= amount
 	current_health = clamp(current_health, 0.0, max_health)
 
-func handle_shooting():
-	# No shoot if reloading
-	if is_reloading and not infinite_ammo:
-		time_since_last_shot = 0.0 #reset timer
-		return
 
-	# Auto reload if out of ammo
-	if current_ammo <= 0 and not infinite_ammo:
-		start_reload()
-		return
-
-
-	# Check if left mouse button is pressed
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		# Update facing direction to mouse while shooting
-		last_direction = mouse_direction
-		# Check fire rate
-		if time_since_last_shot >= fire_rate:
-			shoot()
-	else:
-		# Not shooting, reset flag
-		is_shooting = false
-
-func shoot():
-	if not bullet_scene:
-		return
-
-	if is_reloading:
-		return
-
-	# Check Ammo
-	if current_ammo <= 0:
-		return
-
-	# Decrement each time a bullet is shot	
-	if not infinite_ammo:
-		current_ammo -= 1
-	
-	time_since_last_shot = 0.0
-	is_shooting = true
-
-	# Play shoot sound
-	shoot_sound.play()
-	
-	# Create bullet instance
-	var bullet = bullet_scene.instantiate()
-	get_tree().current_scene.add_child(bullet)
-	
-	# Position bullet slightly in front of player (offset in direction of shooting)
-	var spawn_offset = mouse_direction * 20  # Offset by 20 pixels in shooting direction
-	bullet.global_position = global_position + spawn_offset
-	
-	# Set bullet direction and speed
-	if bullet.has_method("set_direction"):
-		bullet.set_direction(mouse_direction)
-	elif "direction" in bullet:
-		bullet.direction = mouse_direction
-	elif "velocity" in bullet:
-		bullet.velocity = mouse_direction * bullet_speed
-
-	# Set bullet speed
-	if "speed" in bullet:
-		bullet.speed = bullet_speed
-	elif "velocity" in bullet:
-		bullet.velocity = mouse_direction * bullet_speed
-
-func start_reload():
-	# Do not reload if already reloading or magazine is full
-	if is_reloading or current_ammo >= magazine_size:
-		return
-
-	# Start reload
-	is_reloading = true
-	reload_timer = reload_time
-	
-	# Play reload sound
-	if reload_sound:
-		reload_sound.play()
-
-func finish_reload():
-	# Re fill the magazine 
-	current_ammo = magazine_size
-	is_reloading = false
 
 func update_animations(direction: Vector2):
 	if not animated_sprite.sprite_frames:
@@ -280,15 +170,15 @@ func update_animations(direction: Vector2):
 	
 	var anim_name: String = ""
 	var is_moving = velocity.length() > 0
-	var is_shooting_button = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	# var is_shooting_button = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 	
 	# If shooting (mouse button held), use shoot animation based on mouse direction
 	# Character faces mouse direction regardless of movement direction
 	if is_dashing:
 		anim_name = "dash"
-	elif is_shooting_button:
-		anim_name = get_direction_animation(mouse_direction, "shoot")
-		last_direction = mouse_direction  # Update facing direction to mouse
+	# elif is_shooting_button:
+	# 	anim_name = get_direction_animation(mouse_direction, "shoot")
+	# 	last_direction = mouse_direction  # Update facing direction to mouse
 	elif is_moving:
 		anim_name = get_direction_animation(direction, "walk")
 		last_direction = direction
@@ -311,8 +201,8 @@ func get_direction_animation(dir: Vector2, anim_type: String) -> String:
 		dir = last_direction if last_direction.length() > 0.1 else Vector2.DOWN
 	
 	# For shoot animations, we have more directions (including pure left/right)
-	if anim_type == "shoot":
-		return get_shoot_direction_animation(dir)
+	# if anim_type == "shoot":
+	# 	return get_shoot_direction_animation(dir)
 	
 	# Threshold for determining if it's more vertical or horizontal
 	var threshold = 0.707  # Cos/Sin of 45 degrees (normalized diagonal)
@@ -339,33 +229,33 @@ func get_direction_animation(dir: Vector2, anim_type: String) -> String:
 			else:
 				return prefix + " right down"
 
-func get_shoot_direction_animation(dir: Vector2) -> String:
-	# For shooting, we have 8 directions including pure left/right
-	var abs_x = abs(dir.x)
-	var abs_y = abs(dir.y)
-	var threshold = 0.5  # Threshold for pure directions
+# func get_shoot_direction_animation(dir: Vector2) -> String:
+# 	# For shooting, we have 8 directions including pure left/right
+# 	var abs_x = abs(dir.x)
+# 	var abs_y = abs(dir.y)
+# 	var threshold = 0.5  # Threshold for pure directions
 	
-	# Check for pure vertical (up/down)
-	if abs_x < threshold:
-		if dir.y < 0:
-			return "shoot up"
-		else:
-			return "shoot down"
-	# Check for pure horizontal (left/right)
-	elif abs_y < threshold:
-		if dir.x < 0:
-			return "shoot left"
-		else:
-			return "shoot right"
-	# Diagonals
-	else:
-		if dir.y < 0:  # Upper half
-			if dir.x < 0:
-				return "shoot left up"
-			else:
-				return "shoot right up"
-		else:  # Lower half
-			if dir.x < 0:
-				return "shoot left down"
-			else:
-				return "shoot right down"
+# 	# Check for pure vertical (up/down)
+# 	if abs_x < threshold:
+# 		if dir.y < 0:
+# 			return "shoot up"
+# 		else:
+# 			return "shoot down"
+# 	# Check for pure horizontal (left/right)
+# 	elif abs_y < threshold:
+# 		if dir.x < 0:
+# 			return "shoot left"
+# 		else:
+# 			return "shoot right"
+# 	# Diagonals
+# 	else:
+# 		if dir.y < 0:  # Upper half
+# 			if dir.x < 0:
+# 				return "shoot left up"
+# 			else:
+# 				return "shoot right up"
+# 		else:  # Lower half
+# 			if dir.x < 0:
+# 				return "shoot left down"
+# 			else:
+# 				return "shoot right down"

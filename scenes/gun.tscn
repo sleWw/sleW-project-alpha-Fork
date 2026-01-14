@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://dkcn6x88shwgd"]
+
+[ext_resource type="Script" uid="uid://boutvyj3in0wg" path="res://scripts/gun.gd" id="1_gun_script"]
+[ext_resource type="Texture2D" uid="uid://djn46hhm4vp2f" path="res://assets/weapons/Icon29_09 1.png" id="2_qd4js"]
+[ext_resource type="AudioStream" uid="uid://6se4cbcxve74" path="res://assets/audio/sounds/fx-pack-1/WAV/FX_Shoot04.wav" id="3_shoot_sound"]
+[ext_resource type="AudioStream" uid="uid://bwxgndi33evfk" path="res://assets/audio/sounds/gun/gun-reload1.mp3" id="4_reload_sound"]
+
+[node name="Gun" type="Node2D"]
+rotation = -6.2831855
+script = ExtResource("1_gun_script")
+
+[node name="GunSprite" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.48333392, 0.48333392)
+texture = ExtResource("2_qd4js")
+
+[node name="MuzzleMarker" type="Marker2D" parent="."]
+position = Vector2(17, 7.6293945e-06)
+rotation = -0.7853982
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="ShootSoundPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_shoot_sound")
+volume_db = -25.762
+
+[node name="ReloadSoundPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_reload_sound")
+volume_db = -25.761
