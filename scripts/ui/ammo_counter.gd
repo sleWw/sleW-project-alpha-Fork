@@ -25,7 +25,7 @@ func _ready():
 		if "current_ammo" in gun:
 			last_known_ammo = gun.current_ammo
 			update_display()
-	
+
 	# Initialize reload progress
 	if reload_progress:
 		reload_progress.min_value = 0.0
@@ -52,7 +52,7 @@ func _process(_delta):
 func update_display():
 	if not ammo_label:
 		return
-	
+
 	if gun and "current_ammo" in gun:
 		# Check if reloading - show circular progress, hide ammo text
 		if "is_reloading" in gun and gun.is_reloading:

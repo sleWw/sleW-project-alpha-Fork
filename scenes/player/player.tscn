@@ -923,6 +923,7 @@ animations = [{
 }]
 
 [node name="Player" type="CharacterBody2D"]
+position = Vector2(957, 539)
 up_direction = Vector2(0, 1)
 script = ExtResource("1_player")
 
@@ -941,4 +942,3 @@ shape = ExtResource("2_collision")
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="Gun" parent="." instance=ExtResource("9_5gtgg")]
-position = Vector2(0, 0)

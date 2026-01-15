@@ -85,16 +85,16 @@ func _physics_process(delta):
 		# D = East (move right, positive X)
 		if Input.is_key_pressed(KEY_D):
 			input_direction.x += 1.0
-		
-		# Normalize to prevent faster diagonal movement
-		input_direction = input_direction.normalized()
-		
-		# Set velocity based on input
-		if input_direction != Vector2.ZERO:
-			velocity = input_direction * speed
-			last_direction = input_direction  # Store direction for idle animations
-		else:
-			velocity = velocity.move_toward(Vector2.ZERO, speed)
+	
+	# Normalize to prevent faster diagonal movement
+	input_direction = input_direction.normalized()
+	
+	# Set velocity based on input
+	if input_direction != Vector2.ZERO:
+		velocity = input_direction * speed
+		last_direction = input_direction  # Store direction for idle animations
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, speed)
 	
 	# Update animations - use dash direction if dashing, otherwise use input direction
 	# var anim_direction = mouse_direction if is_dashing else input_direction
